@@ -7,6 +7,37 @@
 #include <ctype.h>
 #include "monty.h"
 bus_t bus = {NULL, NULL, NULL, 0};
+ssize_t c_getline(char **lineptr, size_t *n, FILE *stream) {
+    char *line = NULL;
+    size_t bufsize = 0;
+    ssize_t read_chars = 0;
+
+    if (!lineptr || !n || !stream) {
+        return -1;
+    }
+
+    if (*lineptr) {
+        line = *lineptr;
+        bufsize = *n;
+    } else {
+        bufsize = 128;
+        line = (char *)malloc(bufsize);
+        if (!line) {
+            return -1;
+        }
+    }
+
+    if (fgets(line, bufsize, stream) != NULL) {
+        read_chars = strlen(line);
+        *lineptr = line;
+        *n = bufsize;
+    } else if (read_chars == 0) {
+        free(line);
+        return -1;
+    }
+
+    return read_chars;
+}
 /**
 * main - monty code interpreter
 * @argc: number of arguments
@@ -37,7 +68,7 @@ int main(int argc, char *argv[])
 	while (read_line > 0)
 	{
 		content = NULL;
-		read_line = getline(&content, &size, file);
+		read_line = c_getline(&content, &size, file);
 		bus.content = content;
 		counter++;
 		if (read_line > 0)
